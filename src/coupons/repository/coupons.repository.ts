@@ -3,6 +3,7 @@ import { Coupon } from '../../types/coupon.interface';
 import { RedisProvider } from '../../shared/redis/redis.provider';
 import { RedisJSON } from '@redis/json/dist/commands';
 import { PromisePool } from '@supercharge/promise-pool';
+import { SubQueryBuilder } from 'src/shared/redis/sub-query-builder/sub-query-builder.interface';
 
 
 @Injectable()
@@ -14,16 +15,19 @@ export class CouponsRepository implements OnModuleInit {
 
     onModuleInit() { }
 
-    async search(text: string, fields: Array<string>, tags: {name: string, value: string}[]) {
-        return this.redisProvider.searchJson(CouponsRepository.indexName, {
-            textSearch: { text, fields },
-            tags
-        });
+    async search(
+        subQueries: SubQueryBuilder[],
+        skip?: number,
+        limit?: number
+    ) {
+        const parsedLimit = skip !== undefined && limit !== undefined ? { offset: skip, num: limit } : undefined;
+        const result = await this.redisProvider.searchJson(CouponsRepository.indexName, subQueries, { limit: parsedLimit });
+        return result
     }
 
     async add(id: string, coupon: Coupon) {
         return this.redisProvider.setJson(
-            `${CouponsRepository.indexDocPrefix}:${id}`, 
+            `${CouponsRepository.indexDocPrefix}:${id}`,
             coupon as unknown as RedisJSON);
     }
 

@@ -1,27 +1,44 @@
 import { Injectable } from '@nestjs/common';
+import { IncludeTextQuery, MatchTagQuery, MatchTextStartWithQuery } from 'src/shared/redis/sub-query-builder/sub-query-builder.interface';
 import { CouponProviderType } from 'src/types/coupon-provider-type.enum';
 import { createUniqueId } from '../../shared/utils/create-unique-id';
 import { Coupon } from '../../types/coupon.interface';
 import { CouponsRepository } from '../repository/coupons.repository';
+
+
+interface SearchCouponsResponse {
+    
+}
 
 @Injectable()
 export class CouponsService {
 
     constructor(private couponsRepository: CouponsRepository) { }
 
+    async queryCouponsByGroup(group: string) {
+        switch (group) {
+            case CouponProviderType.HAPOALIM:
+            case CouponProviderType.PAIS:
+                return this.couponsRepository.search([
+                    new MatchTagQuery().setArgs('provider', group),  
+                ], 0, 20)
+                .then(res => res.documents.map(({id, value}) => ({ id, ...value })));
+            default:        
+        }
+    }
+
     async searchCoupons(
         text: string,
         field: string | Array<string>,
-        provider: CouponProviderType
-    ) {
-        const textIncluded = `*${text.replace('*', '')}*`;
-        return this.couponsRepository.search(
-            textIncluded,
-            Array.isArray(field) ? field : [field],
-            [{ name: 'provider', value: `${provider || ''}` }]
-        );
+        provider: CouponProviderType,
+        skip?: number, limit?: number,
+    ): Promise<Array<Coupon & {id:string}>> {        
+        const searchResult = await this.couponsRepository.search([
+            new MatchTagQuery().setArgs('provider', provider),  
+            new IncludeTextQuery().setArgs(field, text),  
+        ], skip, limit);
+        return searchResult.documents.map(({id, value}) => ({ id, ...value } as Coupon & {id:string}));
     }
-
 
     async autocompleteSearchCoupons(
         text: string,
@@ -31,12 +48,10 @@ export class CouponsService {
         if(text.length < 3) {
             return { total: 0, documents: [] };
         }
-        const autocompleteText = `${text.replace('*', '')}*`;
-        return this.couponsRepository.search(
-            autocompleteText,
-            Array.isArray(field) ? field : [field],
-            [{ name: 'provider', value: provider ? `${provider}` : undefined }]
-        );
+        return this.couponsRepository.search([
+            new MatchTagQuery().setArgs('provider', provider),  
+            new MatchTextStartWithQuery().setArgs(field, text),  
+        ], 0, 5);
     }
 
     async addCoupons(coupons: Coupon[]) {
@@ -46,31 +61,5 @@ export class CouponsService {
         })));
     }
 
-    async blah() {
-        // await this.couponsRepository.add('123', {
-        //     title: 'מסעדה',
-        //     description: 'מסעדה אאאא',
-        //     link: 'http://momo.com',
-        //     priceText: 'עד 100 שח',
-        // });
-        // await this.couponsRepository.add('1235', {
-        //     title: 'המבורגר מסעדה',
-        //     description: 'מסעדה אאאא המבורגר ',
-        //     link: 'http://momo.com',
-        //     priceText: 'עד 150 שח',
-        // });
-        // await this.couponsRepository.add('123', {
-        //     title: 'my doc 01',
-        //     description: 'my doc 01 desc',
-        //     link: 'http://momo.com',
-        //     priceText: '100'
-        // });
-        // await this.couponsRepository.add('1235', {
-        //     title: 'my doc 02',
-        //     description: 'my doc 02 desc',
-        //     link: 'http://momo.com',
-        //     priceText: '100'
-        // });
-    }
 }
 

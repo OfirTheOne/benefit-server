@@ -17,7 +17,6 @@ export class HapoalimScrapper implements CouponScrapper {
         let browser: Browser;
         try {
             browser = await this.scrapper.launchBrowser();
-            
             let page = await browser.newPage();
             page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36');
             await page.goto('https://www.bankhapoalim.co.il/he/Poalim-Wonder');
@@ -31,25 +30,37 @@ export class HapoalimScrapper implements CouponScrapper {
                 console.log('navigating to %s', category.link);
                 const coupons = await page.$$eval(
                     "#team-members-container > div.team-member",
-                    couponCards => couponCards.map(div => ({
-                        link: '', 
-                        image: '', 
-                        title: div.querySelector('.team-member-title').innerHTML,
-                        priceText: div.querySelector('div.team-member-subtitle').innerHTML,
-                        description: ''
-                    }))
+                    couponCards => couponCards.map(div => {
+                        const divImg = div.querySelector('.team-member-img'); 
+                        const backImg = divImg?.['style']?.["background-image"];
+                        return {
+                            link: '', 
+                            image: backImg,
+                            title: div.querySelector('.team-member-title').innerHTML,
+                            priceText: div.querySelector('div.team-member-subtitle').innerHTML,
+                            description: ''
+                        };
+                    })
                 );
                     
                 accCoupons.push(
-                    ...(coupons.map(c => ({ 
-                        ...c, 
-                        provider: this.type,
-                        link: category.link, 
-                        category: category.title
-                    })))
+                    ...(coupons.map(c => {
+                        let image = '';
+                        if(c.image) {
+                            const relativeImagePath = c.image ? (c.image.match(/url\(\"(?<url>.+)\"\)/)?.groups?.url) || '' : '';
+                            const url = new URL('https://www.bankhapoalim.co.il' + relativeImagePath);
+                            image = url.origin + url.pathname;
+                        }
+                        return { 
+                            ...c, 
+                            image,
+                            provider: this.type,
+                            link: category.link, 
+                            category: category.title
+                        };
+                    }))
                 );
-                console.log(coupons);
-
+                // console.log(coupons);
             }
             return accCoupons;
         } catch (error) {

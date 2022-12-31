@@ -4,13 +4,10 @@ import { createClient, RedisClientType, SchemaFieldTypes } from 'redis';
 import { RedisJSON } from '@redis/json/dist/commands';
 import { RediSearchSchema } from '@redis/search';
 import { Config } from '../../types/config.interface';
+import { SubQueryBuilder } from './sub-query-builder/sub-query-builder.interface';
 
 interface JsonSearchParams {
-    textSearch: {
-        text: string, 
-        fields: Array<string>
-    },
-    tags: {name: string, value: string}[]
+    limit?: {offset: number, num: number}
 }
 
 @Injectable()
@@ -94,20 +91,16 @@ export class RedisProvider {
         }
     }
 
-    searchJson(index: string, params: JsonSearchParams) {
-        const { textSearch: { text, fields }, tags = [] } = params;
-        const tagsQuery = tags
-            .filter(({value}) => !!value)
-            .map(({name, value}) => `@${name}:{${value}}`)
-            .join(' ');
-        const textSearchQuery = 
-            fields.map(f => `@${f}:${text}`)
-            .join(' ')
- 
-        const query = `${textSearchQuery} ${tagsQuery}`.trim();
+    searchJson(index: string, subQueries: SubQueryBuilder[], options: JsonSearchParams) {
+        const { limit } = options;
+        const query = subQueries.map(subQ => subQ.build()).join(' ');
         try {
             console.log(query);
-            return this._client.ft.search(index, query);
+            return this._client.ft.search(index, query, 
+                {
+                    LIMIT: limit? { from: limit.offset, size: limit.num } : undefined 
+                } 
+            );
         } catch (error) {
             console.error((<Error>error).message);
             throw error;

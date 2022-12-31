@@ -56,7 +56,7 @@ export class CouponsSource implements OnModuleDestroy {
                 console.log(error);
             }
         }
-
+        
         for (let { result: scrapResult, field } of providerServices) {
             try {
                 if (scrapResult && scrapResult.length) {
@@ -66,6 +66,7 @@ export class CouponsSource implements OnModuleDestroy {
                 console.log(error);
             }
         }
+        
         return finalResult;
     }
 
