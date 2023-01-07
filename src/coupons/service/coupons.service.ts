@@ -18,7 +18,7 @@ export class CouponsService {
     async queryCouponsByGroup(group: string) {
         switch (group) {
             case CouponProviderType.HAPOALIM:
-            case CouponProviderType.PAIS:
+            case CouponProviderType.PAIS: 
                 return this.couponsRepository.search([
                     new MatchTagQuery().setArgs('provider', group),  
                 ], 0, 20)
@@ -32,12 +32,18 @@ export class CouponsService {
         field: string | Array<string>,
         provider: CouponProviderType,
         skip?: number, limit?: number,
-    ): Promise<Array<Coupon & {id:string}>> {        
+    ): Promise<{
+        total: number;
+        result: Array<Coupon & {id:string}>;
+    }> {
         const searchResult = await this.couponsRepository.search([
             new MatchTagQuery().setArgs('provider', provider),  
             new IncludeTextQuery().setArgs(field, text),  
         ], skip, limit);
-        return searchResult.documents.map(({id, value}) => ({ id, ...value } as Coupon & {id:string}));
+        return {
+            result: searchResult.documents.map(({id, value}) => ({ id, ...value } as Coupon & {id:string})), 
+            total: searchResult.total
+        }
     }
 
     async autocompleteSearchCoupons(

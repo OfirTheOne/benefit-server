@@ -3,15 +3,15 @@ import { AppController } from './app.controller';
 import { CouponsSourceModule } from './coupons-source/coupons-source.module';
 import { SharedModule } from './shared/shared.module';
 import { CouponsModule } from './coupons/coupons.module';
-import { ServeStaticModule } from '@nestjs/serve-';
+// import { ServeStaticModule } from '@nestjs/serve-static';
 
-import { join } from 'path';
+// import { join } from 'path';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'),
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', 'client'),
+    // }),
     CouponsSourceModule,
     SharedModule,
     CouponsModule

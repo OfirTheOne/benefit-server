@@ -1,19 +1,24 @@
-import { Controller, Post, Get, Query, Param } from '@nestjs/common';
+import { Controller, Post, Get, Query, Param, ParseIntPipe } from '@nestjs/common';
 import { CouponProviderType } from '../types/coupon-provider-type.enum';
 import { CouponsService } from './service/coupons.service';
 
 @Controller('coupons')
 export class CouponsController {
-    constructor(private couponsService: CouponsService) {}
-    
+    constructor(private couponsService: CouponsService) { }
+
     // @Post()
     // addCoupon() {
     //     return this.couponsService.addCoupons();
     // }
 
     @Get('search')
-    searchCoupon(@Query('text') text: string, @Query('provider') provider: CouponProviderType) {
-        return this.couponsService.searchCoupons(text, ['title'], provider);
+    searchCoupon(
+        @Query('text') text: string,
+        @Query('provider') provider: CouponProviderType,
+        @Query('skip', ParseIntPipe) skip: number = 0,
+        @Query('limit', ParseIntPipe) limit: number = 20,
+    ) {
+        return this.couponsService.searchCoupons(text, ['title'], provider, skip, limit);
     }
 
     @Get('')
@@ -23,13 +28,13 @@ export class CouponsController {
             CouponProviderType.PAIS
         ]
         const results = await Promise.all(
-            providers.map(p => 
+            providers.map(p =>
                 this.couponsService.searchCoupons('', [], p, 0, 20)
                     .then(res => ([p, res] as const))
             )
         );
         return results.reduce((acc, [p, result]) => ({ ...acc, [p]: result }), {});
-        
+
     }
 
 
@@ -38,10 +43,10 @@ export class CouponsController {
         return this.couponsService.queryCouponsByGroup(group);
     }
 
-    
+
     @Get('autocomplete')
     autocompleteCoupon(@Query('text') text: string, @Query('provider') provider: CouponProviderType) {
         return this.couponsService.autocompleteSearchCoupons(text, ['title'], provider);
     }
-    
+
 }
