@@ -56,7 +56,8 @@ export class HapoalimScrapper implements CouponScrapper {
                             image,
                             provider: this.type,
                             link: category.link, 
-                            category: category.title
+                            category: category.title,
+                            systemCategories: []
                         };
                     }))
                 );

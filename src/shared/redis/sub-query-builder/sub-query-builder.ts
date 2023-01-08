@@ -1,9 +1,4 @@
-
-
-export interface SubQueryBuilder {
-    setArgs(...args: any[]): SubQueryBuilder;
-    build(): string 
-}
+import { SubQueryBuilder } from "../../../types/sub-query-builder.interface";
 
 
 export class MatchTagQuery implements SubQueryBuilder {

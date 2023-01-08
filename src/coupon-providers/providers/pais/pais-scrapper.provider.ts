@@ -3,7 +3,16 @@ import { Scrapper } from '../../../shared/scrapper/scrapper.provider';
 import { CouponScrapper } from '../../types/coupon-scrapper.interface';
 import { Coupon } from '../../../types/coupon.interface';
 import { CouponProviderType } from '../../../types/coupon-provider-type.enum';
+import { CouponCategory } from "../../../types/coupon-category.enum";
 
+export class CategoryMappingProvider {
+
+    mapping = { };
+    mapCategory(category ): CouponCategory {
+        return CouponCategory.FOOD_AND_RESTAURANTS
+    }
+
+}
 
 @Injectable()
 export class PaisScrapper implements CouponScrapper {
@@ -46,7 +55,8 @@ export class PaisScrapper implements CouponScrapper {
                         ...c, 
                         provider: this.type,
                         category: category.title,
-                        subCategory: category.subTitle
+                        subCategory: category.subTitle,
+                        systemCategories: []
                     })))
                 );
             }
@@ -56,3 +66,5 @@ export class PaisScrapper implements CouponScrapper {
         } 
     }
 }
+
+

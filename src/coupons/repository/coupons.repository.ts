@@ -3,7 +3,7 @@ import { Coupon } from '../../types/coupon.interface';
 import { RedisProvider } from '../../shared/redis/redis.provider';
 import { RedisJSON } from '@redis/json/dist/commands';
 import { PromisePool } from '@supercharge/promise-pool';
-import { SubQueryBuilder } from 'src/shared/redis/sub-query-builder/sub-query-builder.interface';
+import { SubQueryBuilder } from '../../types/sub-query-builder.interface';
 
 
 @Injectable()

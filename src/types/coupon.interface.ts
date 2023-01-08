@@ -1,3 +1,4 @@
+import { CouponCategory } from "./coupon-category.enum";
 import { CouponProviderType } from "./coupon-provider-type.enum";
 
 export interface Coupon {
@@ -10,4 +11,5 @@ export interface Coupon {
     subCategory?: string,
     image?: string,
     content?: string,
+    systemCategories: CouponCategory[],
 }

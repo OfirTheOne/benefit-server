@@ -1,23 +1,18 @@
 import { Global, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { AppConfigModule } from './config/config.module';
 import { RedisModule } from './redis/redis.module';
-import * as path from 'path';
 
-const envFilePath = path.join('config', `${process.env.ENV || 'default'}.cfg`);
 
 
 @Global()
 @Module({
     imports: [
-        ConfigModule.forRoot({
-            envFilePath
-        }),
+        AppConfigModule,
         RedisModule,
     ],
     exports: [
-        ConfigModule,
+        AppConfigModule,
         RedisModule
     ]
-
 })
-export class SharedModule {}
+export class SharedModule { }

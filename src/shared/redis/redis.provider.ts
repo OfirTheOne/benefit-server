@@ -4,7 +4,7 @@ import { createClient, RedisClientType, SchemaFieldTypes } from 'redis';
 import { RedisJSON } from '@redis/json/dist/commands';
 import { RediSearchSchema } from '@redis/search';
 import { Config } from '../../types/config.interface';
-import { SubQueryBuilder } from './sub-query-builder/sub-query-builder.interface';
+import { SubQueryBuilder } from "../../types/sub-query-builder.interface";
 
 interface JsonSearchParams {
     limit?: {offset: number, num: number}
