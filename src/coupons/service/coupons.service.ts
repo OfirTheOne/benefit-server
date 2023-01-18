@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { IncludeTextQuery, MatchTagQuery, MatchTextStartWithQuery } from 'src/shared/redis/sub-query-builder/sub-query-builder';
-import { CouponProviderType } from 'src/types/coupon-provider-type.enum';
+import { IncludeTextQuery, MatchTagQuery, MatchTextStartWithQuery } from '../../shared/redis/sub-query-builder/sub-query-builder';
 import { createUniqueId } from '../../shared/utils/create-unique-id';
-import { Coupon } from '../../types/coupon.interface';
 import { CouponsRepository } from '../repository/coupons.repository';
+import { CouponProviderType } from '../../types/coupon-provider-type.enum';
+import { Coupon } from '../../types/coupon.interface';
 
 
 @Injectable()

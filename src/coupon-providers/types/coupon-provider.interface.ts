@@ -1,4 +1,4 @@
-import { CouponProviderType } from "src/types/coupon-provider-type.enum";
+import { CouponProviderType } from "../../types/coupon-provider-type.enum";
 import { Coupon } from "../../types/coupon.interface";
 import { CouponProcessor } from "./coupon-processor.interface";
 import { CouponScrapper } from "./coupon-scrapper.interface";
