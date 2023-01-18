@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HapoalimScrapper } from '../coupon-providers/providers/hapoalim/hapoalim-scrapper.provider';
+import { HapoalimScrapper } from '../coupon-providers/providers/hapoalim/hapoalim-scrapper';
 import { CouponsSource } from './coupons-source';
 
 describe('CouponsSource', () => {

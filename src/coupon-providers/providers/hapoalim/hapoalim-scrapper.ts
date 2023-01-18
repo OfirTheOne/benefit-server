@@ -1,19 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { Scrapper } from '../../../shared/scrapper/scrapper.provider';
-import { CouponScrapper } from '../../../coupon-providers/types/coupon-scrapper.interface';
-import { Coupon } from '../../../types/coupon.interface';
+import { CouponScrapper } from '../../types/coupon-scrapper.interface';
 import { CouponProviderType } from '../../../types/coupon-provider-type.enum';
 import { Browser } from 'puppeteer';
-
+import { HapoalimRawCoupon } from './hapoalim-raw-coupon.interface';
 
 @Injectable()
-export class HapoalimScrapper implements CouponScrapper {
+export class HapoalimScrapper implements CouponScrapper<HapoalimRawCoupon> {
     
     readonly type = CouponProviderType.HAPOALIM;
-
     constructor(protected scrapper: Scrapper) { }
 
-    async scrap(): Promise<Coupon[]> {
+    async scrap(): Promise<HapoalimRawCoupon[]> {
         let browser: Browser;
         try {
             browser = await this.scrapper.launchBrowser();
@@ -24,7 +22,7 @@ export class HapoalimScrapper implements CouponScrapper {
                 "main div.links-gallery.paragraph-bottom-margin.paragraph-section > div > div > div > div > ul > li > a",
                 catAnchors => catAnchors.map(a => ({ link: a.href, title: a.outerText }))
             );
-            const accCoupons: Array<Coupon> = [];
+            const rawCoupons: Array<HapoalimRawCoupon> = [];
             for (const category of catagories) {
                 await page.goto(category.link);
                 console.log('navigating to %s', category.link);
@@ -43,27 +41,11 @@ export class HapoalimScrapper implements CouponScrapper {
                     })
                 );
                     
-                accCoupons.push(
-                    ...(coupons.map(c => {
-                        let image = '';
-                        if(c.image) {
-                            const relativeImagePath = c.image ? (c.image.match(/url\(\"(?<url>.+)\"\)/)?.groups?.url) || '' : '';
-                            const url = new URL('https://www.bankhapoalim.co.il' + relativeImagePath);
-                            image = url.origin + url.pathname;
-                        }
-                        return { 
-                            ...c, 
-                            image,
-                            provider: this.type,
-                            link: category.link, 
-                            category: category.title,
-                            systemCategories: []
-                        };
-                    }))
+                rawCoupons.push(
+                    ...coupons.map(c => ({ ...c, category }))
                 );
-                // console.log(coupons);
             }
-            return accCoupons;
+            return rawCoupons;
         } catch (error) {
             console.log(error);
         } finally{
@@ -74,3 +56,5 @@ export class HapoalimScrapper implements CouponScrapper {
         }
     }
 }
+
+

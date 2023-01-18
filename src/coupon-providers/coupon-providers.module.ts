@@ -1,20 +1,25 @@
 
 
 import { Module } from '@nestjs/common';
-import { ScrapperModule } from '../shared/scrapper/scrapper.module';
 import { CouponProvidersService } from './service/coupon-providers.service';
-import { pluggedScrappers } from './providers/plugged-scrappers';
+import { PaisModule } from './providers/pais/pais.module';
+import { HapoalimModule } from './providers/hapoalim/hapoalim.module';
+import { HapoalimProvider } from './providers/hapoalim/hapoalim.provider';
+import { PaisProvider } from './providers/pais/pais.provider';
 
 @Module({
     providers: [
-        ...pluggedScrappers,
+        HapoalimProvider,
+        PaisProvider,
         CouponProvidersService
     ],
     imports: [
-        ScrapperModule,
+        HapoalimModule,
+        PaisModule
     ],
     exports: [
-        ...pluggedScrappers,
+        HapoalimProvider,
+        PaisProvider,
         CouponProvidersService
     ]
 })

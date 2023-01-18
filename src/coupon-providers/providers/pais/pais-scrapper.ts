@@ -1,27 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Scrapper } from '../../../shared/scrapper/scrapper.provider';
 import { CouponScrapper } from '../../types/coupon-scrapper.interface';
-import { Coupon } from '../../../types/coupon.interface';
-import { CouponProviderType } from '../../../types/coupon-provider-type.enum';
-import { CouponCategory } from "../../../types/coupon-category.enum";
+import { PaisRawCoupon } from './pais-raw-coupon.interface';
 
-export class CategoryMappingProvider {
-
-    mapping = { };
-    mapCategory(category ): CouponCategory {
-        return CouponCategory.FOOD_AND_RESTAURANTS
-    }
-
-}
 
 @Injectable()
-export class PaisScrapper implements CouponScrapper {
+export class PaisScrapper implements CouponScrapper<PaisRawCoupon> {
     
-    readonly type = CouponProviderType.PAIS;
-
     constructor(protected scrapper: Scrapper) { }
 
-    async scrap(): Promise<Coupon[]> {
+    async scrap(): Promise<PaisRawCoupon[]> {
         try {
             const browser = await this.scrapper.launchBrowser();
             let page = await browser.newPage();
@@ -37,7 +25,7 @@ export class PaisScrapper implements CouponScrapper {
                 )
             );
             const catagories = groupedCatagories.reduce((accCats, cat) => accCats.concat(cat));    
-            const accCoupons: Array<Coupon> = [];
+            const rawCoupons: Array<PaisRawCoupon> = [];
             for (const category of catagories) {
                 await page.goto(category.href);
                 const coupons = await page.$$eval(
@@ -50,21 +38,12 @@ export class PaisScrapper implements CouponScrapper {
                         description: '',
                     }))
                 );
-                accCoupons.push(
-                    ...(coupons.map(c => ({
-                        ...c, 
-                        provider: this.type,
-                        category: category.title,
-                        subCategory: category.subTitle,
-                        systemCategories: []
-                    })))
-                );
+                rawCoupons.push(...coupons.map(c => ({ ...c, category })));
             }
-            return accCoupons;
+            return rawCoupons;
         } catch (error) {
             console.log(error);
         } 
     }
 }
-
 

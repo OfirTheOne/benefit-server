@@ -1,19 +1,19 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CouponsService } from '../coupons/service/coupons.service';
-import { CouponScrapper } from '../coupon-providers/types/coupon-scrapper.interface';
-import { PaisScrapper } from '../coupon-providers/providers/pais/pais-scrapper.provider';
-import { HapoalimScrapper } from '../coupon-providers/providers/hapoalim/hapoalim-scrapper.provider';
 import { CouponProviderType } from '../types/coupon-provider-type.enum';
 import { Coupon } from '../types/coupon.interface';
+import { HapoalimProvider } from '../coupon-providers/providers/hapoalim/hapoalim.provider';
+import { PaisProvider } from '../coupon-providers/providers/pais/pais.provider';
+import { CouponProvider } from 'src/coupon-providers/types/coupon-provider.interface';
 
 @Injectable()
 export class CouponsSource implements OnModuleDestroy {
 
     constructor(
         private schedulerRegistry: SchedulerRegistry,
-        protected hapoalimScrapper: HapoalimScrapper,
-        protected paisScrapper: PaisScrapper,
+        protected hapoalimProvider: HapoalimProvider,
+        protected paisProvider: PaisProvider,
         protected couponsService: CouponsService
     ) { }
 
@@ -34,12 +34,12 @@ export class CouponsSource implements OnModuleDestroy {
 
         const providerServices = [
             {
-                service: this.hapoalimScrapper,
+                service: this.hapoalimProvider,
                 field: 'hapoalim',
                 result: [] as Coupon[]
             },
             {
-                service: this.paisScrapper,
+                service: this.paisProvider,
                 field: 'pais',
                 result: [] as Coupon[]
             }
@@ -70,9 +70,9 @@ export class CouponsSource implements OnModuleDestroy {
         return finalResult;
     }
 
-    async scrap(providers: CouponProviderType[], scrapper: CouponScrapper): Promise<Coupon[] | undefined> {
+    async scrap(providers: CouponProviderType[], scrapper: CouponProvider): Promise<Coupon[] | undefined> {
         return providers.includes(scrapper.type) ?
-            await scrapper.scrap().catch((e) => {
+            await scrapper.provide().catch((e) => {
                 console.log(`Error scraping, %s`, (<Error>e).message);
                 return undefined;
             }) : undefined;
